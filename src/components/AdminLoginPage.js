@@ -62,4 +62,4 @@ function AdminLoginPage({ apiUrl, tokenKey, roleKey, onLoginSuccess }) {
   );
 }
 
-export default AdminLoginPage;cd ~/Desktop/teleconsultation-app
+export default AdminLoginPage;
