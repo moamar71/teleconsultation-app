@@ -12,10 +12,11 @@ function AdminLoginPage({ apiUrl, tokenKey, roleKey, onLoginSuccess }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      console.log("Sending request to:", `${apiUrl}/api/admin-login`); // سجل للتصحيح
       const response = await axios.post(
         `${apiUrl}/api/admin-login`,
         { username, password },
-        { timeout: 60000 } // زيادة المهلة إلى 60 ثانية
+        { timeout: 60000 }
       );
       const { token, role, userId } = response.data;
       localStorage.setItem(tokenKey, token);
@@ -24,6 +25,7 @@ function AdminLoginPage({ apiUrl, tokenKey, roleKey, onLoginSuccess }) {
       toast.success("Login successful!");
       onLoginSuccess({ role, userId });
     } catch (err) {
+      console.error("Error during login:", err); // سجل للتصحيح
       setError(err.response?.data?.message || "Erreur de connexion");
       toast.error("Erreur de connexion");
     }
