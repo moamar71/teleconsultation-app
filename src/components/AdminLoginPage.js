@@ -4,7 +4,12 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import socket from "../socket";
 
-function AdminLoginPage({ apiUrl, tokenKey, roleKey, onLoginSuccess }) {
+const API_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://teleconsultation-backend.onrender.com/api"
+    : "http://localhost:10000/api";
+
+function AdminLoginPage({ tokenKey, roleKey, onLoginSuccess }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -32,9 +37,9 @@ function AdminLoginPage({ apiUrl, tokenKey, roleKey, onLoginSuccess }) {
     setError("");
 
     try {
-      console.log("Sending request to:", `${apiUrl}/api/admin-login`);
+      console.log("Sending request to:", `${API_URL}/admin-login`);
       const response = await axios.post(
-        `${apiUrl}/api/admin-login`,
+        `${API_URL}/admin-login`,
         { username, password },
         { timeout: 60000 }
       );

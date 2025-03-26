@@ -2,13 +2,8 @@ import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import AdminLoginPage from "./components/AdminLoginPage";
-import Dashboard from "./components/Dashboard"; // افترض أن لديك هذه الصفحة
-import ProtectedRoute from "./components/ProtectedRoute"; // مكون لحماية المسارات
-
-const API_URL =
-  process.env.NODE_ENV === "production"
-    ? "https://teleconsultation-backend.onrender.com"
-    : "http://localhost:10000";
+import Dashboard from "./components/Dashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   const [user, setUser] = useState({ role: null, userId: null });
@@ -44,7 +39,6 @@ function App() {
               <Navigate to="/admin-dashboard" />
             ) : (
               <AdminLoginPage
-                apiUrl={API_URL}
                 tokenKey="token"
                 roleKey="role"
                 onLoginSuccess={handleLoginSuccess}
