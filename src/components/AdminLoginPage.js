@@ -15,15 +15,21 @@ function AdminLoginPage({ tokenKey, roleKey, onLoginSuccess }) {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    socket.onopen = () => {
-      console.log("WebSocket connected");
+    const connectWebSocket = () => {
+      socket.onopen = () => {
+        console.log("WebSocket connected");
+      };
+      socket.onerror = (error) => {
+        console.error("WebSocket error:", error);
+      };
+      socket.onclose = () => {
+        console.log("WebSocket disconnected");
+        // إعادة المحاولة بعد 5 ثوانٍ
+        setTimeout(connectWebSocket, 5000);
+      };
     };
-    socket.onerror = (error) => {
-      console.error("WebSocket error:", error);
-    };
-    socket.onclose = () => {
-      console.log("WebSocket disconnected");
-    };
+
+    connectWebSocket();
 
     return () => {
       socket.onopen = null;
