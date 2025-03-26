@@ -1,9 +1,15 @@
-// teleconsultation-app/src/components/Navbar.js
 import React from "react";
 import { Navbar as BootstrapNavbar, Nav, Button } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
-function Navbar({ role, onLogout }) {
+function Navbar({ user, onLogout }) {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    onLogout();
+    navigate("/admin-login");
+  };
+
   return (
     <BootstrapNavbar bg="dark" variant="dark" expand="lg">
       <BootstrapNavbar.Brand as={Link} to="/">
@@ -11,27 +17,21 @@ function Navbar({ role, onLogout }) {
       </BootstrapNavbar.Brand>
       <BootstrapNavbar.Toggle aria-controls="basic-navbar-nav" />
       <BootstrapNavbar.Collapse id="basic-navbar-nav">
-        <Nav className="me-auto">
-          {role === "Admin" && (
-            <Nav.Link as={Link} to="/dashboard">
-              Dashboard
+        <Nav className="ms-auto">
+          {user.role ? (
+            <>
+              <Nav.Link as={Link} to="/admin-dashboard">
+                Dashboard
+              </Nav.Link>
+              <Button variant="outline-light" onClick={handleLogout}>
+                Déconnexion
+              </Button>
+            </>
+          ) : (
+            <Nav.Link as={Link} to="/admin-login">
+              Connexion Admin
             </Nav.Link>
           )}
-          {role === "Doctor" && (
-            <Nav.Link as={Link} to="/doctor-dashboard">
-              Doctor Dashboard
-            </Nav.Link>
-          )}
-          {role === "Patient" && (
-            <Nav.Link as={Link} to="/patient-profile">
-              Profile
-            </Nav.Link>
-          )}
-        </Nav>
-        <Nav>
-          <Button variant="outline-light" onClick={onLogout}>
-            Logout
-          </Button>
         </Nav>
       </BootstrapNavbar.Collapse>
     </BootstrapNavbar>

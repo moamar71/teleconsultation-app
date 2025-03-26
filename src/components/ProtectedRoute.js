@@ -1,20 +1,17 @@
-// teleconsultation-app/src/components/ProtectedRoute.js
 import React from "react";
 import { Navigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
-function ProtectedRoute({ children, allowedRoles }) {
-  const role = localStorage.getItem("role");
+const ProtectedRoute = ({ children, requiredRole }) => {
   const token = localStorage.getItem("token");
+  const role = localStorage.getItem("role");
 
-  if (!token || !role) {
+  if (!token || (requiredRole && role !== requiredRole)) {
+    toast.error("Veuillez vous connecter en tant qu'admin");
     return <Navigate to="/admin-login" replace />;
   }
 
-  if (!allowedRoles.includes(role)) {
-    return <Navigate to="/" replace />;
-  }
-
   return children;
-}
+};
 
 export default ProtectedRoute;

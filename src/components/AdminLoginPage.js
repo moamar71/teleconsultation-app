@@ -1,18 +1,38 @@
-// teleconsultation-app/src/components/AdminLoginPage.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Form, Button, Container, Alert } from "react-bootstrap";
 import { toast } from "react-toastify";
 import axios from "axios";
+import socket from "../socket";
 
 function AdminLoginPage({ apiUrl, tokenKey, roleKey, onLoginSuccess }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    socket.onopen = () => {
+      console.log("WebSocket connected");
+    };
+    socket.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+    socket.onclose = () => {
+      console.log("WebSocket disconnected");
+    };
+
+    return () => {
+      socket.onopen = null;
+      socket.onerror = null;
+      socket.onclose = null;
+    };
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+
     try {
-      console.log("Sending request to:", `${apiUrl}/api/admin-login`); // سجل للتصحيح
+      console.log("Sending request to:", `${apiUrl}/api/admin-login`);
       const response = await axios.post(
         `${apiUrl}/api/admin-login`,
         { username, password },
@@ -22,10 +42,17 @@ function AdminLoginPage({ apiUrl, tokenKey, roleKey, onLoginSuccess }) {
       localStorage.setItem(tokenKey, token);
       localStorage.setItem(roleKey, role);
       localStorage.setItem("userId", userId);
-      toast.success("Login successful!");
+      toast.success("Connexion réussie !");
+
+      if (socket.readyState === WebSocket.OPEN) {
+        socket.send(`Admin ${username} logged in`);
+      } else {
+        console.warn("WebSocket is not connected");
+      }
+
       onLoginSuccess({ role, userId });
     } catch (err) {
-      console.error("Error during login:", err); // سجل للتصحيح
+      console.error("Error during login:", err);
       setError(err.response?.data?.message || "Erreur de connexion");
       toast.error("Erreur de connexion");
     }

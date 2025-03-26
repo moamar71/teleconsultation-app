@@ -1,122 +1,69 @@
-// teleconsultation-app/src/App.js
-import React from "react";
-import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import "bootstrap/dist/css/bootstrap.min.css";
+import React, { useState, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import AdminLoginPage from "./components/AdminLoginPage";
-import "./App.css";
+import Dashboard from "./components/Dashboard"; // افترض أن لديك هذه الصفحة
+import ProtectedRoute from "./components/ProtectedRoute"; // مكون لحماية المسارات
+
+const API_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://teleconsultation-backend.onrender.com"
+    : "http://localhost:10000";
 
 function App() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const role = localStorage.getItem("role");
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    localStorage.removeItem("userId");
-    navigate("/admin-login");
-  };
-
-  const handleLoginSuccess = (data) => {
-    if (data.role === "Admin") {
-      navigate("/dashboard");
-    } else if (data.role === "Doctor") {
-      navigate("/doctor-dashboard");
-    } else if (data.role === "Patient") {
-      navigate("/patient-profile");
-    }
-  };
-
-  return (
-    <div className="page-container">
-      <ToastContainer />
-      {role &&
-        !["/admin-login"].includes(location.pathname) && (
-          <Navbar role={role} onLogout={handleLogout} />
-        )}
-      <Routes>
-        <Route
-          path="/admin-login"
-          element={
-            <AdminLoginPage
-              apiUrl="https://teleconsultation-backend.onrender.com"
-              tokenKey="token"
-              roleKey="role"
-              onLoginSuccess={handleLoginSuccess}
-            />
-          }
-        />
-      </Routes>
-    </div>
-  );
-}
-
-export default App;```javascript
-// teleconsultation-app/src/App.js
-import React, { useEffect } from "react";
-import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import "bootstrap/dist/css/bootstrap.min.css";
-import Navbar from "./components/Navbar";
-import AdminLoginPage from "./components/AdminLoginPage";
-import "./App.css";
-
-function App() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const role = localStorage.getItem("role");
+  const [user, setUser] = useState({ role: null, userId: null });
 
   useEffect(() => {
-    if (!role && !["/admin-login"].includes(location.pathname)) {
-      navigate("/admin-login");
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+    const userId = localStorage.getItem("userId");
+    if (token && role && userId) {
+      setUser({ role, userId });
     }
-  }, [role, location.pathname, navigate]);
+  }, []);
+
+  const handleLoginSuccess = ({ role, userId }) => {
+    setUser({ role, userId });
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
     localStorage.removeItem("userId");
-    navigate("/admin-login");
-  };
-
-  const handleLoginSuccess = (data) => {
-    if (data.role === "Admin") {
-      navigate("/dashboard");
-    } else if (data.role === "Doctor") {
-      navigate("/doctor-dashboard");
-    } else if (data.role === "Patient") {
-      navigate("/patient-profile");
-    }
+    setUser({ role: null, userId: null });
   };
 
   return (
-    <div className="page-container">
-      <ToastContainer />
-      {role &&
-        !["/admin-login"].includes(location.pathname) && (
-          <Navbar role={role} onLogout={handleLogout} />
-        )}
+    <Router>
+      <Navbar user={user} onLogout={handleLogout} />
       <Routes>
         <Route
           path="/admin-login"
           element={
-            <AdminLoginPage
-              apiUrl="https://teleconsultation-backend.onrender.com"
-              tokenKey="token"
-              roleKey="role"
-              onLoginSuccess={handleLoginSuccess}
-            />
+            user.role ? (
+              <Navigate to="/admin-dashboard" />
+            ) : (
+              <AdminLoginPage
+                apiUrl={API_URL}
+                tokenKey="token"
+                roleKey="role"
+                onLoginSuccess={handleLoginSuccess}
+              />
+            )
           }
         />
-        <Route path="*" element={<h1>Page Not Found</h1>} />
+        <Route
+          path="/admin-dashboard"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/" element={<Navigate to="/admin-login" />} />
       </Routes>
-    </div>
+    </Router>
   );
 }
 
 export default App;
-```
